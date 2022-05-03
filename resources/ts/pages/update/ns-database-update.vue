@@ -2,7 +2,7 @@
     <div class="container mx-auto flex-auto items-center justify-center flex">
         <div id="database-update" class="w-full md:w-2/3 lg:w-1/3">
             <div class="flex justify-center items-center py-6">
-                <img class="w-32" src="/svg/nexopos-variant-1.svg" alt="NexoPOS">
+                <img class="w-32" src="/svg/niutpv.svg" alt="NexoPOS">
             </div>
             <div class="my-3 rounded shadow ns-box">
                 <div class="border-b ns-box-header py-4 flex items-center justify-center">

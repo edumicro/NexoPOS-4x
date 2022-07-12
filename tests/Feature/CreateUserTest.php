@@ -17,6 +17,8 @@ use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\UnitGroup;
 use App\Models\User;
+use App\Services\Users;
+use Exception;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -28,40 +30,96 @@ class CreateUserTest extends TestCase
 {
     use WithAuthentication, WithFaker;
 
+    protected Users $users;
+
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    private function test_create_users()
+    public function test_create_users()
     {
         $this->attemptAuthenticate();
 
-        return Role::get()->map( function( $role ) {
-            $password   =   Hash::make( Str::random(20) );
+        $this->users = app()->make( Users::class );
 
-            $response   =   $this->withSession( $this->app[ 'session' ]->all() )
-                ->json( 'post', '/api/nexopos/v4/crud/ns.users', [
-                    'username'  =>  $this->faker->username(),
-                    'general'   =>  [
-                        'email'     =>  $this->faker->email(),
-                        'password'  =>  $password,
-                        'password_confirm'  =>  $password,
-                        'roles'     =>  [ $role->id ],
-                        'active'    =>  1, // true
-                    ]
-                ]);
-              
-            
+        return Role::get()->map( function( $role ) {
+            $password = Hash::make( Str::random(20) );
+
+            $configuration = [
+                'username'  =>  $this->faker->username(),
+                'general'   =>  [
+                    'email'     =>  $this->faker->email(),
+                    'password'  =>  $password,
+                    'password_confirm'  =>  $password,
+                    'roles'     =>  [ $role->id ],
+                    'active'    =>  1, // true
+                ],
+            ];
+
+            $response = $this->withSession( $this->app[ 'session' ]->all() )
+                ->json( 'post', '/api/nexopos/v4/crud/ns.users', $configuration );
+
             $response->assertJsonPath( 'status', 'success' );
-            $result     =   json_decode( $response->getContent() );
+            $result = json_decode( $response->getContent() );
+
+            /**
+             * Step 1: create user with same username
+             * but a different email
+             */
+            try {
+                $this->users->setUser([
+                    'username'  =>  $configuration[ 'username' ],
+                    'email'     =>  $this->faker->email(),
+                    'roles'     =>  $configuration[ 'general' ][ 'roles' ],
+                    'active'    =>  true,
+                ]);
+            } catch ( Exception $exception ) {
+                $this->assertTrue( strstr( $exception->getMessage(), 'username' ) !== false );
+            }
+
+            /**
+             * Step 2: create user with same email
+             * but a different username
+             */
+            try {
+                $this->users->setUser([
+                    'username'  =>  $this->faker->userName(),
+                    'email'     =>  $configuration[ 'general' ][ 'email' ],
+                    'roles'     =>  $configuration[ 'general' ][ 'roles' ],
+                    'active'    =>  true,
+                ]);
+            } catch ( Exception $exception ) {
+                $this->assertTrue( strstr( $exception->getMessage(), 'email' ) !== false );
+            }
+
+            /**
+             * Step 3: Update user from Crud component
+             */
+            $configuration = [
+                'username'  =>  $this->faker->username(),
+                'general'   =>  [
+                    'email'     =>  $this->faker->email(),
+                    'password'  =>  $password,
+                    'password_confirm'  =>  $password,
+                    'roles'     =>  [ $role->id ],
+                    'active'    =>  1, // true
+                ],
+            ];
+
+            $response = $this->withSession( $this->app[ 'session' ]->all() )
+                ->json( 'put', '/api/nexopos/v4/crud/ns.users/' . $result->entry->id, $configuration );
+
+            $response->assertJsonPath( 'status', 'success' );
+            $result = json_decode( $response->getContent() );
+
             return $result->entry;
         });
     }
 
     public function test_created_users()
     {
-        $user   =   User::first();
+        $user = User::first();
         $this->attemptAllRoutes( $user );
     }
 
@@ -70,9 +128,9 @@ class CreateUserTest extends TestCase
         /**
          * @var User $user
          */
-        $user   =   User::findOrFail( $user->id );
+        $user = User::findOrFail( $user->id );
 
-        $paramsModelBinding     =   [
+        $paramsModelBinding = [
             '/\{product\}/'                                 =>  Product::class,
             '/\{provider\}/'                                =>  Provider::class,
             '/\{procurement\}/'                             =>  Procurement::class,
@@ -82,8 +140,9 @@ class CreateUserTest extends TestCase
             '/\{unit\}/'                                    =>  Unit::class,
             '/\{reward\}/'                                  =>  RewardSystem::class,
             '/\{customer\}|\{customerAccountHistory\}/' =>  function() {
-                $customerAccountHistory     =   CustomerAccountHistory::first()->id;
-                $customer                   =   $customerAccountHistory->customer->id;
+                $customerAccountHistory = CustomerAccountHistory::first()->id;
+                $customer = $customerAccountHistory->customer->id;
+
                 return compact( 'customerAccountHistory', 'customer' );
             },
             '/\{paymentType\}/'                             =>  PaymentType::class,
@@ -97,10 +156,10 @@ class CreateUserTest extends TestCase
          * Step 1: We'll attempt registering with the email
          * to cause a failure because of the email used
          */
-        $routes     =   Route::getRoutes();
+        $routes = Route::getRoutes();
 
-        foreach( $routes as $route ) {
-            $uri    =   $route->uri();
+        foreach ( $routes as $route ) {
+            $uri = $route->uri();
 
             /**
              * For now we'll only test dashboard routes
@@ -110,25 +169,25 @@ class CreateUserTest extends TestCase
                  * For requests that doesn't support
                  * any paremeters
                  */
-                foreach( $paramsModelBinding as $expression => $binding ) {
+                foreach ( $paramsModelBinding as $expression => $binding ) {
                     if ( preg_match( $expression, $uri ) ) {
                         if ( is_array( $binding ) ) {
-                            
+
                             /**
                              * We want to replace all argument
                              * on the uri by the matching binding collection
                              */
-                            foreach( $binding as $parameter => $value ) {
-                                $uri    =   preg_replace( '/\{' . $parameter . '\}/', $value, $uri );
+                            foreach ( $binding as $parameter => $value ) {
+                                $uri = preg_replace( '/\{' . $parameter . '\}/', $value, $uri );
                             }
-                        } else if ( is_string( $binding ) ) {
+                        } elseif ( is_string( $binding ) ) {
 
                             /**
                              * This are URI with a single parameter
                              * that are replaced once the binding is resolved.
                              */
-                            $value  =   $binding::firstOrFail()->id;
-                            $uri    =   preg_replace( $expression, $value, $uri );
+                            $value = $binding::firstOrFail()->id;
+                            $uri = preg_replace( $expression, $value, $uri );
                         }
                     }
                 }
@@ -139,12 +198,12 @@ class CreateUserTest extends TestCase
                  * those routes.
                  */
                 if ( preg_match( '/\{(.+)\}/', $uri ) === 0 ) {
-                    $response   =   $this
+                    $response = $this
                         ->actingAs( $user )
                         ->json( 'GET', $uri );
 
-                    $status     =   $response->baseResponse->getStatusCode();
-    
+                    $status = $response->baseResponse->getStatusCode();
+
                     if ( $user->roles->map( fn( $role ) => $role->namespace )->first() === 'admin' ) {
                         $this->assertTrue(
                             in_array( $status, [ 201, 200, 302, 401 ]),

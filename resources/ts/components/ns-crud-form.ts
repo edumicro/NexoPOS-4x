@@ -47,7 +47,7 @@ const nsCrudForm    =   Vue.component( 'ns-crud-form', {
         },
         submit() {
             if ( this.formValidation.validateForm( this.form ).length > 0 ) {
-                return nsSnackBar.error( this.$slots[ 'error-invalid-form' ] ? this.$slots[ 'error-invalid-form' ][0].text : 'No error message provided for having an invalid form.', this.$slots[ 'okay' ] ? this.$slots[ 'okay' ][0].text : 'OK' )
+                return nsSnackBar.error( this.$slots[ 'error-invalid' ] ? this.$slots[ 'error-invalid' ][0].text : 'No error message provided for having an invalid form.', this.$slots[ 'okay' ] ? this.$slots[ 'okay' ][0].text : 'OK' )
                     .subscribe();
             }
 
@@ -61,9 +61,12 @@ const nsCrudForm    =   Vue.component( 'ns-crud-form', {
             nsHttpClient[ this.submitMethod ? this.submitMethod.toLowerCase() : 'post' ]( this.submitUrl, this.formValidation.extractForm( this.form ) )
                 .subscribe( result => {
                     if ( result.status === 'success' ) {
-                        if ( this.returnUrl && this.returnUrl.length > 0 ) {
-                            return document.location   =   this.returnUrl;
+                        if ( this.submitMethod.toLowerCase() === 'post' && this.returnUrl !== false ) {
+                            return document.location   =   result.data.editUrl || this.returnUrl;
+                        } else {
+                            nsSnackBar.info( result.message, __( 'Okay' ), { duration: 3000 }).subscribe();
                         }
+
                         this.$emit( 'save', result );
                     }
                     this.formValidation.enableForm( this.form );

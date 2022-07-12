@@ -26,6 +26,7 @@ class MigrateForgetCommand extends Command
 
     /**
      * Module service
+     *
      * @var ModulesService
      */
     private $moduleService;
@@ -37,11 +38,10 @@ class MigrateForgetCommand extends Command
      */
     public function __construct(
         ModulesService $moduleService
-    )
-    {
+    ) {
         parent::__construct();
 
-        $this->moduleService    =   $moduleService;
+        $this->moduleService = $moduleService;
     }
 
     /**
@@ -51,27 +51,36 @@ class MigrateForgetCommand extends Command
      */
     public function handle()
     {
-        $module     =   $this->moduleService->get( $this->argument( 'module' ) );
+        $module = $this->moduleService->get( $this->argument( 'module' ) );
 
-        if ( $module !== null ) {
+        if ( $module !== null && $this->argument( 'module' ) !== null ) {
             if ( ! in_array( $this->option( 'file' ), $module[ 'all-migrations' ] ) ) {
                 ModuleMigration::where( 'namespace', $this->argument( 'module' ) )
                     ->delete();
             }
-    
+
             ModuleMigration::where( 'namespace', $this->argument( 'module' ) )
                 ->where( 'file', $this->option( 'file' ) )
                 ->delete();
-            
-            Artisan::call( 'cache:clear' );
-    
+
+            Artisan::call( 'cache:clear', [ '--force' => true ] );
+
+            return $this->info(
+                sprintf(
+                    __( 'The migration file has been successfully forgotten for the module %s.' ),
+                    $module[ 'name' ]
+                )
+            );
         } else {
+            $deleted = Migration::where( 'migration', $this->option( 'file' ) )->delete();
+            Artisan::call( 'cache:clear', [ '--force' => true ] );
 
-            Migration::where( 'migration', $this->option( 'file' ) )->delete();
-            Artisan::call( 'cache:clear' );
-
+            return $this->info(
+                sprintf(
+                    __( '%s migration(s) has been deleted.' ),
+                    $deleted
+                )
+            );
         }
-
-        return $this->info( __( 'The migration file has been successfully forgotten.' ) );
     }
 }

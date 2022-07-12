@@ -1,13 +1,11 @@
 <?php
 /**
  * Table Migration
- * @package  5.0
 **/
 
-use App\Classes\Hook;
-use App\Classes\Schema;;
-use Illuminate\Database\Schema\Blueprint;
+use App\Classes\Schema;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreateCustomersTable extends Migration
 {
@@ -66,7 +64,9 @@ class CreateCustomersTable extends Migration
                 $table->bigIncrements( 'id' );
                 $table->integer( 'customer_id' );
                 $table->integer( 'order_id' )->nullable();
+                $table->float( 'previous_amount' )->default(0);
                 $table->float( 'amount' )->default(0);
+                $table->float( 'next_amount' )->default(0);
                 $table->string( 'operation' ); // sub / add
                 $table->integer( 'author' );
                 $table->text( 'description' )->nullable();
@@ -87,4 +87,3 @@ class CreateCustomersTable extends Migration
         Schema::dropIfExists( 'nexopos_customers_account_history' );
     }
 }
-

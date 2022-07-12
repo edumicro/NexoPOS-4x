@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         <div class="flex items-center">
-                            <button class="items-center flex justify-center h-8 w-8 rounded border text-primary ns-inset-button error">
+                            <button @click="removeInstalment( instalment )" class="items-center flex justify-center h-8 w-8 rounded border text-primary ns-inset-button error">
                                 <i class="las la-times"></i>
                             </button>
                         </div>
@@ -55,12 +55,16 @@
             </div>
         </div>
         <div class="p-2 flex border-t ns-box-footer justify-between flex-shrink-0">
-            <div></div>
-            <div class="-mx-1 flex">
-                <div class="px-1">
+            <div class="md:-mx-1 flex flex-col md:flex-row">
+                <div class="md:px-1">
+                    <ns-button @click="skipInstalments()" type="info">{{ __( 'Skip Instalments' ) }}</ns-button>
+                </div>
+            </div>
+            <div class="md:-mx-1 flex flex-col md:flex-row">
+                <div class="md:px-1">
                     <ns-button @click="close()" type="error">{{ __( 'Cancel' ) }}</ns-button>
                 </div>
-                <div class="px-1">
+                <div class="md:px-1">
                     <ns-button @click="updateOrder()" type="info">{{ __( 'Proceed' ) }}</ns-button>
                 </div>
             </div>
@@ -169,6 +173,11 @@ export default {
                 this.totalPayments  =   0;
             }
         },
+        removeInstalment( instament ) {
+            const index     =   this.order.instalments.indexOf( instament );
+            this.order.instalments.splice( index, 1 );
+            this.$forceUpdate();
+        },
         generatePaymentFields( totalInstalments ) {
             this.order.instalments    =   ( new Array( parseInt( totalInstalments ) ) )
                 .fill('')
@@ -200,6 +209,23 @@ export default {
         close() {
             this.$popupParams.reject({ status: 'failed', message: __( 'You must define layaway settings before proceeding.' ) });
             this.$popup.close();
+        },
+        skipInstalments() {
+            this.order.instalments  =   [{
+                amount: this.expectedPayment,
+                date: ns.date.current
+            }];
+
+            this.order.final_payment_date   =   this.order.instalments.reverse()[0].date;
+            this.order.total_instalments    =   this.order.instalments.length;
+
+            this.$popup.close();
+            
+            POS.order.next( this.order );
+
+            const { resolve, reject }   =   this.$popupParams;
+            
+            return resolve({ order: this.order, skip_layaway: true });
         },
         updateOrder() {
             if ( this.order.instalments.length === 0 ) {
@@ -278,7 +304,7 @@ export default {
             
             POS.order.next( order );
             
-            return resolve( order );
+            return resolve({ order, skip_layaway : false });
         },
         loadFields() {
             nsHttpClient.get( `/api/nexopos/v4/fields/ns.layaway` )

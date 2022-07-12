@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'version'       =>  '4.7.5',
+    'version'       =>  '4.8.0',
     'languages'     =>  [
         'en'        =>  'English',
         'fr'        =>  'Français',
@@ -8,6 +9,8 @@ return [
         'it'        =>  'Italian',
         'ar'        =>  'Arabic',
         'pt'        =>  'Portuguese',
+        'tr'        =>  'Türkçe',
+        'vi'        =>  'Vietnamese',
     ],
     'rtl-languages' =>  [ 'ar' ],
     'timezones'      =>  [
@@ -410,6 +413,6 @@ return [
         'Antarctica/McMurdo' => '(GMT+12:00) Antarctica/McMurdo (New Zealand Standard Time)',
         'Antarctica/South_Pole' => '(GMT+12:00) Antarctica/South_Pole (New Zealand Standard Time)',
         'Asia/Anadyr' => '(GMT+12:00) Asia/Anadyr (Anadyr Time)',
-        'Asia/Kamchatka' => '(GMT+12:00) Asia/Kamchatka (Petropavlovsk-Kamchatski Time)'
-    ]
+        'Asia/Kamchatka' => '(GMT+12:00) Asia/Kamchatka (Petropavlovsk-Kamchatski Time)',
+    ],
 ];

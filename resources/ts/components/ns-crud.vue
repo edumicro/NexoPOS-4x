@@ -3,13 +3,13 @@
         <div id="crud-table-header" class="p-2 border-b border-popup-surface flex flex-col md:flex-row justify-between flex-wrap" v-if="mode !== 'light'">
             <div id="crud-search-box" class="w-full md:w-auto -mx-2 mb-2 md:mb-0 flex">
                 <div v-if="createUrl" class="px-2 flex items-center justify-center">
-                    <a  :href="createUrl || '#'" class="rounded-full ns-crud-button text-sm h-10 flex items-center justify-center cursor-pointer px-3 outline-none border"><i class="las la-plus"></i></a>
+                    <a :href="createUrl || '#'" class="rounded-full ns-crud-button text-sm h-10 flex items-center justify-center cursor-pointer px-3 outline-none border"><i class="las la-plus"></i></a>
                 </div>
                 <div class="px-2">
                     <div class="rounded-full p-1 ns-crud-input flex">
                         <input v-model="searchInput" type="text" class="w-36 md:w-auto bg-transparent outline-none px-2">
                         <button @click="search()" class="rounded-full w-8 h-8 outline-none ns-crud-input-button"><i class="las la-search"></i></button>
-                        <button v-if="searchQuery" @click="cancelSearch()" class="ml-1 rounded-full w-8 h-8 bg-error-primary text-white outline-none hover:bg-error-secondary"><i class="las la-times"></i></button>
+                        <button v-if="searchQuery" @click="cancelSearch()" class="ml-1 rounded-full w-8 h-8 bg-error-secondary text-white outline-none hover:bg-error-tertiary"><i class="las la-times"></i></button>
                     </div>
                 </div>
                 <div class="px-2 flex items-center justify-center">
@@ -156,6 +156,7 @@ export default {
             }
         }
     }, 
+    name: 'ns-crud',
     mounted() {
         if ( this.identifier !== undefined  ) {
             nsCrudHandler.defineInstance( this.identifier, this );

@@ -1,47 +1,52 @@
 <?php
+
 namespace App\Crud;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use App\Exceptions\NotAllowedException;
+use App\Models\ProductHistory;
+use App\Models\User;
+use App\Services\CrudEntry;
 use App\Services\CrudService;
 use App\Services\Users;
-use App\Exceptions\NotAllowedException;
-use App\Models\User;
+use Illuminate\Http\Request;
 use TorMorten\Eventy\Facades\Events as Hook;
-use Exception;
-use App\Models\ProductHistory;
 
 class GlobalProductHistoryCrud extends CrudService
 {
     /**
      * define the base table
+     *
      * @param  string
      */
-    protected $table      =   'nexopos_products_histories';
+    protected $table = 'nexopos_products_histories';
 
     /**
      * default slug
+     *
      * @param  string
      */
-    protected $slug   =   '/products/history';
+    protected $slug = '/products/history';
 
     /**
      * Define namespace
+     *
      * @param  string
      */
-    protected $namespace  =   'ns.global-products-history';
+    protected $namespace = 'ns.global-products-history';
 
     /**
      * Model Used
+     *
      * @param  string
      */
-    protected $model      =   ProductHistory::class;
+    protected $model = ProductHistory::class;
 
     /**
      * Define permissions
+     *
      * @param  array
      */
-    protected $permissions  =   [
+    protected $permissions = [
         'create'    =>  false,
         'read'      =>  true,
         'update'    =>  false,
@@ -51,74 +56,78 @@ class GlobalProductHistoryCrud extends CrudService
     /**
      * Adding relation
      * Example : [ 'nexopos_users as user', 'user.id', '=', 'nexopos_orders.author' ]
+     *
      * @param  array
      */
-    public $relations   =  [
+    public $relations = [
         [ 'nexopos_users as user', 'user.id', '=', 'nexopos_products_histories.author' ],
         [ 'nexopos_products as product', 'product.id', '=', 'nexopos_products_histories.product_id' ],
         [ 'nexopos_units as unit', 'unit.id', '=', 'nexopos_products_histories.unit_id' ],
         'leftJoin'  =>  [
             [ 'nexopos_procurements as procurement', 'procurement.id', '=', 'nexopos_products_histories.procurement_id' ],
             [ 'nexopos_orders as order', 'order.id', '=', 'nexopos_products_histories.order_id' ],
-        ]
+        ],
     ];
 
     /**
      * all tabs mentionned on the tabs relations
      * are ignored on the parent model.
      */
-    protected $tabsRelations    =   [
+    protected $tabsRelations = [
         // 'tab_name'      =>      [ YourRelatedModel::class, 'localkey_on_relatedmodel', 'foreignkey_on_crud_model' ],
     ];
 
     /**
      * Pick
      * Restrict columns you retreive from relation.
-     * Should be an array of associative keys, where 
+     * Should be an array of associative keys, where
      * keys are either the related table or alias name.
      * Example : [
      *      'user'  =>  [ 'username' ], // here the relation on the table nexopos_users is using "user" as an alias
      * ]
      */
-    public $pick        =   [];
+    public $pick = [];
 
     /**
      * Define where statement
+     *
      * @var  array
-    **/
-    protected $listWhere    =   [];
+     **/
+    protected $listWhere = [];
 
     /**
      * Define where in statement
+     *
      * @var  array
      */
-    protected $whereIn      =   [];
+    protected $whereIn = [];
 
     /**
      * Fields which will be filled during post/put
      */
-    
+
     /**
      * If few fields should only be filled
      * those should be listed here.
      */
-    public $fillable    =   [];
+    public $fillable = [];
 
     /**
      * If fields should be ignored during saving
      * those fields should be listed here
      */
-    public $skippable   =   [];
+    public $skippable = [];
 
     /**
      * Determine if the options column should display
      * before the crud columns
      */
-    protected $prependOptions     =   false;
+    protected $prependOptions = false;
 
     /**
      * Define Constructor
-     * @param  
+     *
+     * @param
      */
     public function __construct()
     {
@@ -128,10 +137,11 @@ class GlobalProductHistoryCrud extends CrudService
     }
 
     /**
-     * Return the label used for the crud 
+     * Return the label used for the crud
      * instance
+     *
      * @return  array
-    **/
+     **/
     public function getLabels()
     {
         return [
@@ -149,8 +159,9 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Check whether a feature is enabled
-     * @return  boolean
-    **/
+     *
+     * @return  bool
+     **/
     public function isEnabled( $feature ): bool
     {
         return false; // by default
@@ -158,18 +169,20 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Fields
+     *
      * @param  object/null
      * @return  array of field
      */
-    public function getForm( $entry = null ) 
+    public function getForm( $entry = null )
     {
         return [
-           // ...
+            // ...
         ];
     }
 
     /**
      * Filter POST input fields
+     *
      * @param  array of fields
      * @return  array of fields
      */
@@ -180,6 +193,7 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Filter PUT input fields
+     *
      * @param  array of fields
      * @return  array of fields
      */
@@ -190,6 +204,7 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Before saving a record
+     *
      * @param  Request $request
      * @return  void
      */
@@ -206,6 +221,7 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * After saving a record
+     *
      * @param  Request $request
      * @param  ProductHistory $entry
      * @return  void
@@ -215,21 +231,22 @@ class GlobalProductHistoryCrud extends CrudService
         return $request;
     }
 
-    
     /**
      * get
+     *
      * @param  string
      * @return  mixed
      */
     public function get( $param )
     {
-        switch( $param ) {
-            case 'model' : return $this->model ; break;
+        switch ( $param ) {
+            case 'model': return $this->model; break;
         }
     }
 
     /**
      * Before updating a record
+     *
      * @param  Request $request
      * @param  object entry
      * @return  void
@@ -247,6 +264,7 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * After updating a record
+     *
      * @param  Request $request
      * @param  object entry
      * @return  void
@@ -258,9 +276,11 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Before Delete
+     *
      * @return  void
      */
-    public function beforeDelete( $namespace, $id, $model ) {
+    public function beforeDelete( $namespace, $id, $model )
+    {
         if ( $namespace == 'ns.global-products-history' ) {
             /**
              *  Perform an action before deleting an entry
@@ -270,7 +290,7 @@ class GlobalProductHistoryCrud extends CrudService
              *      'status'    =>  'danger',
              *      'message'   =>  __( 'You\re not allowed to do that.' )
              *  ], 403 );
-            **/
+             **/
             if ( $this->permissions[ 'delete' ] !== false ) {
                 ns()->restrict( $this->permissions[ 'delete' ] );
             } else {
@@ -281,66 +301,68 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Define Columns
+     *
      * @return  array of columns configuration
      */
-    public function getColumns() {
+    public function getColumns()
+    {
         return [
             'product_name'  =>  [
                 'label'  =>  __( 'Product' ),
                 '$direction'    =>  '',
                 'width'         =>  '300px',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'procurement_name'  =>  [
                 'label'  =>  __( 'Procurement' ),
                 '$direction'    =>  '',
                 'width'         =>  '200px',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'order_code'  =>  [
                 'label'  =>  __( 'Order' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'operation_type'  =>  [
                 'label'  =>  __( 'Operation Type' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'unit_name'  =>  [
                 'label'  =>  __( 'Unit' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'before_quantity'  =>  [
                 'label'  =>  __( 'Initial Quantity' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'quantity'  =>  [
                 'label'  =>  __( 'Quantity' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'after_quantity'  =>  [
                 'label'  =>  __( 'New Quantity' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'total_price'  =>  [
                 'label'  =>  __( 'Total Price' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'user_username'  =>  [
                 'label'  =>  __( 'Author' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
             'created_at'  =>  [
                 'label'  =>  __( 'Created At' ),
                 '$direction'    =>  '',
-                '$sort'         =>  false
+                '$sort'         =>  false,
             ],
         ];
     }
@@ -348,33 +370,28 @@ class GlobalProductHistoryCrud extends CrudService
     /**
      * Define actions
      */
-    public function setActions( $entry, $namespace )
+    public function setActions( CrudEntry $entry, $namespace )
     {
-        // Don't overwrite
-        $entry->{ '$checked' }  =   false;
-        $entry->{ '$toggled' }  =   false;
-        $entry->{ '$id' }       =   $entry->id;
+        $entry->procurement_name = $entry->procurement_name ?: __( 'N/A' );
+        $entry->order_code = $entry->order_code ?: __( 'N/A' );
+        $entry->total_price = ns()->currency->fresh( $entry->total_price )->format();
 
-        $entry->procurement_name    =   $entry->procurement_name ?: __( 'N/A' );
-        $entry->order_code          =   $entry->order_code ?: __( 'N/A' );
-        $entry->total_price         =   ns()->currency->fresh( $entry->total_price )->format();
-
-        switch( $entry->operation_type ) {
-            case ProductHistory::ACTION_ADDED : 
-            case ProductHistory::ACTION_ADJUSTMENT_RETURN : 
-            case ProductHistory::ACTION_RETURNED : 
-            case ProductHistory::ACTION_STOCKED : 
-            case ProductHistory::ACTION_TRANSFER_CANCELED : 
-            case ProductHistory::ACTION_TRANSFER_IN : 
-            case ProductHistory::ACTION_VOID_RETURN : 
-                $entry->{ '$cssClass' }             =   'info border text-sm';
+        switch ( $entry->operation_type ) {
+            case ProductHistory::ACTION_ADDED :
+            case ProductHistory::ACTION_ADJUSTMENT_RETURN :
+            case ProductHistory::ACTION_RETURNED :
+            case ProductHistory::ACTION_STOCKED :
+            case ProductHistory::ACTION_TRANSFER_CANCELED :
+            case ProductHistory::ACTION_TRANSFER_IN :
+            case ProductHistory::ACTION_VOID_RETURN :
+                $entry->{ '$cssClass' } = 'info border text-sm';
             break;
-            default: 
-                $entry->{ '$cssClass' }             =   'success border text-sm';
+            default:
+                $entry->{ '$cssClass' } = 'success border text-sm';
             break;
         }
 
-        switch( $entry->operation_type ) {
+        switch ( $entry->operation_type ) {
             case ProductHistory::ACTION_ADDED: $entry->operation_type = __( 'Added' ); break;
             case ProductHistory::ACTION_ADJUSTMENT_RETURN: $entry->operation_type = __( 'Stock Return' ); break;
             case ProductHistory::ACTION_ADJUSTMENT_SALE: $entry->operation_type = __( 'Sale Adjustment' ); break;
@@ -392,17 +409,15 @@ class GlobalProductHistoryCrud extends CrudService
         }
 
         // you can make changes here
-        $entry->{'$actions'}    =   [
-            [
-                'label'     =>  __( 'Delete' ),
-                'namespace' =>  'delete',
-                'type'      =>  'DELETE',
-                'url'       =>  ns()->url( '/api/nexopos/v4/crud/ns.global-products-history/' . $entry->id ),
-                'confirm'   =>  [
-                    'message'  =>  __( 'Would you like to delete this ?' ),
-                ]
-            ]
-        ];
+        $entry->addAction( 'delete', [
+            'label'     =>  __( 'Delete' ),
+            'namespace' =>  'delete',
+            'type'      =>  'DELETE',
+            'url'       =>  ns()->url( '/api/nexopos/v4/crud/ns.global-products-history/' . $entry->id ),
+            'confirm'   =>  [
+                'message'  =>  __( 'Would you like to delete this ?' ),
+            ],
+        ]);
 
         return $entry;
     }
@@ -412,19 +427,18 @@ class GlobalProductHistoryCrud extends CrudService
         $query->orderBy( 'id', 'desc' );
     }
 
-    
     /**
      * Bulk Delete Action
+     *
      * @param    object Request with object
      * @return    false/array
      */
-    public function bulkAction( Request $request ) 
+    public function bulkAction( Request $request )
     {
         /**
          * Deleting licence is only allowed for admin
          * and supervisor.
          */
-
         if ( $request->input( 'action' ) == 'delete_selected' ) {
 
             /**
@@ -436,13 +450,13 @@ class GlobalProductHistoryCrud extends CrudService
                 throw new NotAllowedException;
             }
 
-            $status     =   [
+            $status = [
                 'success'   =>  0,
-                'failed'    =>  0
+                'failed'    =>  0,
             ];
 
             foreach ( $request->input( 'entries' ) as $id ) {
-                $entity     =   $this->model::find( $id );
+                $entity = $this->model::find( $id );
                 if ( $entity instanceof ProductHistory ) {
                     $entity->delete();
                     $status[ 'success' ]++;
@@ -450,6 +464,7 @@ class GlobalProductHistoryCrud extends CrudService
                     $status[ 'failed' ]++;
                 }
             }
+
             return $status;
         }
 
@@ -458,6 +473,7 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * get Links
+     *
      * @return  array of links
      */
     public function getLinks(): array
@@ -473,8 +489,9 @@ class GlobalProductHistoryCrud extends CrudService
 
     /**
      * Get Bulk actions
+     *
      * @return  array of actions
-    **/
+     **/
     public function getBulkActions(): array
     {
         return Hook::filter( $this->namespace . '-bulk', [
@@ -482,16 +499,17 @@ class GlobalProductHistoryCrud extends CrudService
                 'label'         =>  __( 'Delete Selected Groups' ),
                 'identifier'    =>  'delete_selected',
                 'url'           =>  ns()->route( 'ns.api.crud-bulk-actions', [
-                    'namespace' =>  $this->namespace
-                ])
-            ]
+                    'namespace' =>  $this->namespace,
+                ]),
+            ],
         ]);
     }
 
     /**
      * get exports
+     *
      * @return  array of export formats
-    **/
+     **/
     public function getExports()
     {
         return [];

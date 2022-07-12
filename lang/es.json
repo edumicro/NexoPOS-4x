@@ -416,7 +416,7 @@
     "Not Allowed Action": "Acci\u00f3n no permitida",
     "Try Again": "Intentar otra vez",
     "Access Denied": "Acceso denegado",
-    "Sign Up": "Inscribirse",
+    "Sign Up": "Registrarse",
     "Unable to find a module having the identifier\/namespace \"%s\"": "No se pudo encontrar un m\u00f3dulo con el identificador\/espacio de nombres \"%s\"",
     "What is the CRUD single resource name ? [Q] to quit.": "\u00bfCu\u00e1l es el nombre de recurso \u00fanico de CRUD? [Q] para salir.",
     "Which table name should be used ? [Q] to quit.": "\u00bfQu\u00e9 nombre de tabla deber\u00eda usarse? [Q] para salir.",

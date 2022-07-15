@@ -17,9 +17,9 @@ Hook::action( 'ns.after-login-fields', $afterForm );
             <div id="sign-in-box" class="w-full md:w-3/5 lg:w-2/5 xl:w-84">
                 <div class="flex justify-center items-center py-6">
                     @if ( ! ns()->option->get( 'ns_store_square_logo', false ) )
-                    <img class="w-32" src="{{ asset( 'svg/niutpv.svg' ) }}" alt="NIUTPV">
+                    <img class="w-32" src="{{ asset( 'svg/mvtpv.svg' ) }}" alt="MVTPV">
                     @else
-                    <img src="{{ ns()->option->get( 'ns_store_square_logo' ) }}" alt="NIUTPV">
+                    <img src="{{ ns()->option->get( 'ns_store_square_logo' ) }}" alt="MVTPV">
                     @endif
                 </div>
                 <x-session-message></x-session-message>
